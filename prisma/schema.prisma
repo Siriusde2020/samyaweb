@@ -1,0 +1,759 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String
+  avatar        String?
+  role          UserRole  @default(USER)
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sites         Site[]
+  teamMembers   TeamMember[]
+  apiKeys       ApiKey[]
+  sessions      Session[]
+  subscription  Subscription?
+  whiteLabel    WhiteLabel?
+
+  @@index([email])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  key       String   @unique
+  lastUsed  DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([key])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// ============================================
+// TEAM & COLLABORATION
+// ============================================
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   TeamMember[]
+  sites     Site[]
+}
+
+model TeamMember {
+  id     String   @id @default(cuid())
+  teamId String
+  userId String
+  role   TeamRole @default(EDITOR)
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+// ============================================
+// SITE & PAGES
+// ============================================
+
+model Site {
+  id              String   @id @default(cuid())
+  userId          String
+  teamId          String?
+  name            String
+  slug            String   @unique
+  domain          String?  @unique
+  favicon         String?
+  description     String?
+  status          SiteStatus @default(DRAFT)
+  sslEnabled      Boolean  @default(true)
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Design System
+  globalStyles    Json?    // colors, typography, spacing
+  themePreset     String?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+  robotsTxt       String?
+  customHead      String?
+  customBody      String?
+
+  // Settings
+  settings        Json?
+  analytics       Json?    // tracking codes
+  i18nConfig      Json?    // language settings
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team            Team?    @relation(fields: [teamId], references: [id])
+  pages           Page[]
+  components      Component[]
+  collections     Collection[]
+  media           Media[]
+  forms           Form[]
+  redirects       Redirect[]
+  deployments     Deployment[]
+  store           Store?
+  versions        SiteVersion[]
+  popups          Popup[]
+  abTests         ABTest[]
+  memberships     Membership[]
+
+  @@index([userId])
+  @@index([slug])
+  @@index([domain])
+}
+
+model SiteVersion {
+  id        String   @id @default(cuid())
+  siteId    String
+  version   Int
+  data      Json     // Full site snapshot
+  message   String?
+  createdAt DateTime @default(now())
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, version])
+  @@index([siteId])
+}
+
+enum SiteStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Page {
+  id          String   @id @default(cuid())
+  siteId      String
+  title       String
+  slug        String
+  path        String
+  isHome      Boolean  @default(false)
+  isDynamic   Boolean  @default(false)
+  status      PageStatus @default(DRAFT)
+  template    String?
+  layout      Json?    // Page structure & elements
+  elements    Json?    // All page elements data
+  seoTitle    String?
+  seoDescription String?
+  ogImage     String?
+  schemaMarkup Json?
+  customCss   String?
+  customJs    String?
+  sortOrder   Int      @default(0)
+  publishedAt DateTime?
+  scheduledAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Dynamic page binding
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, path])
+  @@index([siteId])
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+// ============================================
+// COMPONENT SYSTEM
+// ============================================
+
+model Component {
+  id          String   @id @default(cuid())
+  siteId      String?
+  name        String
+  category    String
+  isGlobal    Boolean  @default(false)
+  isSymbol    Boolean  @default(false) // Edit once, update everywhere
+  props       Json?
+  styles      Json?
+  children    Json?
+  thumbnail   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  site Site? @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([category])
+}
+
+// ============================================
+// HEADLESS CMS
+// ============================================
+
+model Collection {
+  id          String   @id @default(cuid())
+  siteId      String
+  name        String
+  slug        String
+  description String?
+  fields      Json     // Field definitions
+  settings    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  site    Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  items   CollectionItem[]
+  pages   Page[]
+
+  @@unique([siteId, slug])
+  @@index([siteId])
+}
+
+model CollectionItem {
+  id           String   @id @default(cuid())
+  collectionId String
+  data         Json     // Dynamic field values
+  slug         String
+  status       ItemStatus @default(DRAFT)
+  authorId     String?
+  tags         String[]
+  publishedAt  DateTime?
+  scheduledAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, slug])
+  @@index([collectionId])
+  @@index([status])
+}
+
+enum ItemStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+// ============================================
+// MEDIA MANAGEMENT
+// ============================================
+
+model Media {
+  id        String   @id @default(cuid())
+  siteId    String
+  filename  String
+  url       String
+  type      MediaType
+  size      Int
+  width     Int?
+  height    Int?
+  alt       String?
+  folder    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([type])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+  OTHER
+}
+
+// ============================================
+// FORMS
+// ============================================
+
+model Form {
+  id          String   @id @default(cuid())
+  siteId      String
+  name        String
+  fields      Json     // Form field definitions
+  settings    Json?    // Notifications, redirects
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  submissions FormSubmission[]
+
+  @@index([siteId])
+}
+
+model FormSubmission {
+  id        String   @id @default(cuid())
+  formId    String
+  data      Json
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId])
+}
+
+// ============================================
+// SEO
+// ============================================
+
+model Redirect {
+  id        String   @id @default(cuid())
+  siteId    String
+  from      String
+  to        String
+  type      Int      @default(301) // 301 or 302
+  createdAt DateTime @default(now())
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, from])
+  @@index([siteId])
+}
+
+// ============================================
+// E-COMMERCE
+// ============================================
+
+model Store {
+  id           String   @id @default(cuid())
+  siteId       String   @unique
+  name         String
+  currency     String   @default("USD")
+  taxEnabled   Boolean  @default(false)
+  taxRate      Float?
+  shippingRules Json?
+  stripeAccountId String?
+  paypalEmail  String?
+  settings     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  site     Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  products Product[]
+  orders   Order[]
+  coupons  Coupon[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  storeId     String
+  name        String
+  slug        String
+  description String?
+  price       Float
+  comparePrice Float?
+  images      String[]
+  type        ProductType @default(PHYSICAL)
+  status      ProductStatus @default(DRAFT)
+  sku         String?
+  inventory   Int?
+  trackInventory Boolean @default(false)
+  digitalUrl  String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  variants ProductVariant[]
+  orderItems OrderItem[]
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+}
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+  productId String
+  name      String   // e.g., "Large / Red"
+  sku       String?
+  price     Float?
+  inventory Int?
+  options   Json     // { size: "L", color: "Red" }
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([productId])
+}
+
+enum ProductType {
+  PHYSICAL
+  DIGITAL
+  SUBSCRIPTION
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  storeId       String
+  orderNumber   String   @unique
+  email         String
+  status        OrderStatus @default(PENDING)
+  subtotal      Float
+  tax           Float    @default(0)
+  shipping      Float    @default(0)
+  total         Float
+  currency      String   @default("USD")
+  paymentMethod String?
+  paymentId     String?
+  shippingAddress Json?
+  billingAddress  Json?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  store Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  items OrderItem[]
+
+  @@index([storeId])
+  @@index([email])
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  variantId String?
+  quantity  Int
+  price     Float
+
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model Coupon {
+  id          String   @id @default(cuid())
+  storeId     String
+  code        String
+  type        CouponType
+  value       Float
+  minOrder    Float?
+  maxUses     Int?
+  usedCount   Int      @default(0)
+  expiresAt   DateTime?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, code])
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+  FREE_SHIPPING
+}
+
+// ============================================
+// DEPLOYMENT
+// ============================================
+
+model Deployment {
+  id          String   @id @default(cuid())
+  siteId      String
+  status      DeployStatus @default(BUILDING)
+  url         String?
+  previewUrl  String?
+  environment String   @default("production")
+  buildLog    String?
+  duration    Int?     // Build time in ms
+  version     Int?
+  commitHash  String?
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+enum DeployStatus {
+  BUILDING
+  DEPLOYING
+  LIVE
+  FAILED
+  ROLLED_BACK
+}
+
+// ============================================
+// MARKETING
+// ============================================
+
+model Popup {
+  id        String   @id @default(cuid())
+  siteId    String
+  name      String
+  type      PopupType
+  content   Json
+  trigger   Json     // scroll %, time delay, exit intent
+  targeting Json?    // page rules, device, geo
+  active    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+enum PopupType {
+  MODAL
+  SLIDE_IN
+  BAR
+  FULLSCREEN
+}
+
+model ABTest {
+  id         String   @id @default(cuid())
+  siteId     String
+  name       String
+  status     TestStatus @default(DRAFT)
+  variants   Json     // { A: { ... }, B: { ... } }
+  results    Json?    // Conversion data
+  startedAt  DateTime?
+  endedAt    DateTime?
+  createdAt  DateTime @default(now())
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+enum TestStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+}
+
+// ============================================
+// MEMBERSHIP & COMMUNITY
+// ============================================
+
+model Membership {
+  id        String   @id @default(cuid())
+  siteId    String
+  name      String
+  type      MembershipType
+  price     Float?
+  interval  String?  // monthly, yearly
+  features  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site    Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  members Member[]
+
+  @@index([siteId])
+}
+
+model Member {
+  id           String   @id @default(cuid())
+  membershipId String
+  email        String
+  name         String?
+  passwordHash String?
+  status       MemberStatus @default(ACTIVE)
+  stripeSubId  String?
+  createdAt    DateTime @default(now())
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@index([membershipId])
+  @@index([email])
+}
+
+enum MembershipType {
+  FREE
+  PAID
+  SUBSCRIPTION
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// ============================================
+// SUBSCRIPTION & BILLING
+// ============================================
+
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  plan            PlanType @default(FREE)
+  stripeSubId     String?
+  stripeCustomerId String?
+  status          SubStatus @default(ACTIVE)
+  currentPeriodEnd DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum PlanType {
+  FREE
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+  ENTERPRISE
+}
+
+enum SubStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+}
+
+// ============================================
+// WHITE LABEL
+// ============================================
+
+model WhiteLabel {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  brandName     String
+  logo          String?
+  domain        String?  @unique
+  primaryColor  String?
+  secondaryColor String?
+  emailFrom     String?
+  pricingPlans  Json?
+  commission    Float?   @default(0)
+  active        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// APP MARKETPLACE
+// ============================================
+
+model Plugin {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  version     String
+  authorId    String
+  icon        String?
+  category    String
+  downloads   Int      @default(0)
+  rating      Float?
+  price       Float?   @default(0)
+  status      PluginStatus @default(PENDING)
+  manifest    Json     // Plugin configuration
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  installations PluginInstall[]
+
+  @@index([category])
+  @@index([status])
+}
+
+model PluginInstall {
+  id        String   @id @default(cuid())
+  pluginId  String
+  siteId    String
+  settings  Json?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  plugin Plugin @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+
+  @@unique([pluginId, siteId])
+}
+
+enum PluginStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DEPRECATED
+}
