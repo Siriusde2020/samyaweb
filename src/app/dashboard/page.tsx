@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
+import { CreateSiteModal } from '@/components/dashboard/CreateSiteModal';
 import { TemplateGallery } from '@/components/templates/TemplateGallery';
 import { cn } from '@/lib/utils';
 
@@ -37,7 +37,29 @@ const navItems = [
 export default function DashboardPage() {
   const [activeNav, setActiveNav] = useState('sites');
   const [showNewSite, setShowNewSite] = useState(false);
-  const [sites] = useState(mockSites);
+  const [sites, setSites] = useState(mockSites);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/sites')
+      .then(res => res.json())
+      .then(data => {
+        if (data.sites && data.sites.length > 0) {
+          setSites(data.sites.map((s: Record<string, unknown>) => ({
+            id: s.id,
+            name: s.name,
+            slug: s.slug,
+            status: s.status,
+            domain: s.domain,
+            thumbnail: '',
+            updatedAt: s.updatedAt,
+            pageCount: ((s as Record<string, Record<string, number>>)?._count?.pages) ?? 0,
+          })));
+        }
+      })
+      .catch(() => { /* Use mock data on failure */ })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <div className="min-h-screen bg-surface-50">
@@ -169,9 +191,7 @@ export default function DashboardPage() {
       </div>
 
       {/* New Site Modal */}
-      <Modal isOpen={showNewSite} onClose={() => setShowNewSite(false)} title="Create New Site" size="xl">
-        <TemplateGallery onSelect={(id) => { console.log('Create site from:', id); setShowNewSite(false); }} />
-      </Modal>
+      <CreateSiteModal isOpen={showNewSite} onClose={() => setShowNewSite(false)} />
     </div>
   );
 }

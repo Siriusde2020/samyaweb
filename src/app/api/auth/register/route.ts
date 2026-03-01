@@ -1,63 +1,170 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { signToken, hashPassword } from '@/lib/auth';
 
 const registerSchema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
 });
+
+async function isDatabaseAvailable(): Promise<boolean> {
+  if (!process.env.DATABASE_URL) return false;
+  try {
+    const { prisma } = await import('@/lib/db');
+    await prisma.$queryRaw`SELECT 1`;
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password, name } = registerSchema.parse(body);
 
-    // In production:
-    // 1. Check if user exists
-    // const existing = await prisma.user.findUnique({ where: { email } });
-    // if (existing) return error
+    const dbAvailable = await isDatabaseAvailable();
 
-    // 2. Hash password
-    // const passwordHash = await bcrypt.hash(password, 12);
+    if (dbAvailable) {
+      // ---- Real database registration ----
+      const { prisma } = await import('@/lib/db');
 
-    // 3. Create user
-    // const user = await prisma.user.create({
-    //   data: { email, name, passwordHash, role: 'USER' }
-    // });
+      // Check for existing user
+      const existing = await prisma.user.findUnique({
+        where: { email },
+        select: { id: true },
+      });
 
-    // 4. Create default subscription
-    // await prisma.subscription.create({
-    //   data: { userId: user.id, plan: 'FREE', status: 'ACTIVE' }
-    // });
+      if (existing) {
+        return NextResponse.json(
+          { success: false, error: 'An account with this email already exists' },
+          { status: 409 },
+        );
+      }
 
-    // 5. Generate JWT and session
-    // const token = jwt.sign({ userId: user.id }, JWT_SECRET);
+      const passwordHash = await hashPassword(password);
 
-    // 6. Send welcome email
-    // await sendEmail({ to: email, template: 'welcome', data: { name } });
+      // Create user + default subscription in a transaction
+      const user = await prisma.$transaction(async (tx) => {
+        const newUser = await tx.user.create({
+          data: {
+            email,
+            name,
+            passwordHash,
+            role: 'USER',
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            avatar: true,
+          },
+        });
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        user: {
-          id: 'new-user-id',
-          email,
-          name,
-          role: 'USER',
+        await tx.subscription.create({
+          data: {
+            userId: newUser.id,
+            plan: 'FREE',
+            status: 'ACTIVE',
+          },
+        });
+
+        return newUser;
+      });
+
+      const token = signToken({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      // Persist session
+      await prisma.session.create({
+        data: {
+          userId: user.id,
+          token,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
-        token: 'new-jwt-token',
-      },
+      });
+
+      const response = NextResponse.json(
+        {
+          success: true,
+          data: {
+            user: {
+              ...user,
+              subscription: { plan: 'FREE', status: 'ACTIVE' },
+            },
+            token,
+          },
+        },
+        { status: 201 },
+      );
+
+      response.cookies.set('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60,
+        path: '/',
+      });
+
+      return response;
+    }
+
+    // ---- Demo mode (no database) ----
+    const demoUser = {
+      id: 'demo-new-user-' + Date.now().toString(36),
+      email,
+      name,
+      role: 'USER' as const,
+      avatar: null,
+      subscription: { plan: 'FREE' as const, status: 'ACTIVE' as const },
+    };
+
+    const token = signToken({
+      userId: demoUser.id,
+      email: demoUser.email,
+      role: demoUser.role,
     });
+
+    const response = NextResponse.json(
+      {
+        success: true,
+        data: {
+          user: demoUser,
+          token,
+        },
+      },
+      { status: 201 },
+    );
+
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
+    console.error('[auth/register] Unexpected error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,13 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { useBuilderStore } from '@/lib/store/builder-store';
 import { useSiteStore } from '@/lib/store/site-store';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { Button } from '@/components/ui/Button';
+import { PublishModal } from '@/components/builder/PublishModal';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export function BuilderToolbar() {
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const {
     breakpoint,
     setBreakpoint,
@@ -64,6 +67,7 @@ export function BuilderToolbar() {
         <div className="flex items-center gap-0.5 p-0.5 bg-surface-100 dark:bg-surface-800 rounded-lg">
           {[
             { id: 'elements' as const, label: 'Elements', icon: '⊞' },
+            { id: 'blocks' as const, label: 'Blocks', icon: '🧩' },
             { id: 'layers' as const, label: 'Layers', icon: '☰' },
             { id: 'navigator' as const, label: 'Navigator', icon: '⊟' },
           ].map(panel => (
@@ -173,9 +177,16 @@ export function BuilderToolbar() {
           </button>
         </Tooltip>
 
-        <Button variant="secondary" size="sm">Export</Button>
-        <Button variant="primary" size="sm">Publish</Button>
+        <Button variant="secondary" size="sm" onClick={() => setShowPublishModal(true)}>
+          Export
+        </Button>
+        <Button variant="primary" size="sm" onClick={() => setShowPublishModal(true)}>
+          Publish
+        </Button>
       </div>
+
+      {/* Publish Modal */}
+      <PublishModal isOpen={showPublishModal} onClose={() => setShowPublishModal(false)} />
     </div>
   );
 }

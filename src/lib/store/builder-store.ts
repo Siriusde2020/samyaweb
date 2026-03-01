@@ -408,7 +408,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         return cloned;
       };
 
-      const cloned = cloneElement(element, element.parentId);
+      const cloned = cloneElement(element, element.parentId ?? null);
 
       set((s) => {
         if (element.parentId && s.elements[element.parentId]) {

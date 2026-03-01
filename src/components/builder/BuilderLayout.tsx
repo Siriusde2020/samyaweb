@@ -5,6 +5,7 @@ import { useBuilderStore } from '@/lib/store/builder-store';
 import { BuilderToolbar } from './BuilderToolbar';
 import { ElementsPanel } from './ElementsPanel';
 import { LayersPanel } from './LayersPanel';
+import { BlocksPanel } from './BlocksPanel';
 import { StylePanel } from './StylePanel';
 import { BuilderCanvas } from './BuilderCanvas';
 import { NavigatorPanel } from './NavigatorPanel';
@@ -70,6 +71,7 @@ export function BuilderLayout() {
             {leftPanel === 'elements' && <ElementsPanel />}
             {leftPanel === 'layers' && <LayersPanel />}
             {leftPanel === 'navigator' && <NavigatorPanel />}
+            {leftPanel === 'blocks' && <BlocksPanel />}
           </div>
         )}
 

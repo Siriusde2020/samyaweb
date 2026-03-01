@@ -5,9 +5,6 @@ const nextConfig = {
     domains: ['localhost', 'cdn.jamstackbuilder.io'],
     formats: ['image/avif', 'image/webp'],
   },
-  experimental: {
-    serverActions: true,
-  },
   headers: async () => [
     {
       source: '/:path*',

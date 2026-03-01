@@ -232,7 +232,7 @@ export interface BuilderState {
   gridSize: number;
 
   // Panels
-  leftPanel: 'elements' | 'layers' | 'pages' | 'components' | 'navigator' | null;
+  leftPanel: 'elements' | 'layers' | 'pages' | 'components' | 'navigator' | 'blocks' | null;
   rightPanel: 'style' | 'settings' | 'data' | 'animations' | 'interactions' | null;
 
   // History
