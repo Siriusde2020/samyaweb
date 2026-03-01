@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server';
 import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { prisma } from './db';
-
 const JWT_SECRET: Secret = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 
 export interface TokenPayload {
@@ -43,6 +41,7 @@ export async function getAuthUser(request: NextRequest) {
   if (!payload) return null;
 
   try {
+    const { prisma } = await import('./db');
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
       select: {

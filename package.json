@@ -5,7 +5,8 @@
   "description": "The Ultimate JAMStack Website Builder - No-code visual editor with headless CMS, e-commerce, AI features, and global edge deployment",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:migrate": "prisma migrate dev",
