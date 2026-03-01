@@ -104,7 +104,7 @@ const defaultElement = (type: ElementType): Partial<BuilderElement> => {
       styles: {
         fontSize: '32px',
         fontWeight: '700',
-        color: '#1a1a1a',
+        color: '#0f172a',
         lineHeight: '1.2',
         marginBottom: '16px',
       },
@@ -115,7 +115,7 @@ const defaultElement = (type: ElementType): Partial<BuilderElement> => {
       styles: {
         fontSize: '16px',
         fontWeight: '400',
-        color: '#4a4a4a',
+        color: '#334155',
         lineHeight: '1.6',
       },
     },
@@ -146,7 +146,7 @@ const defaultElement = (type: ElementType): Partial<BuilderElement> => {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '12px 24px',
-        backgroundColor: '#4c6ef5',
+        backgroundColor: '#4f46e5',
         color: '#ffffff',
         fontSize: '16px',
         fontWeight: '600',
@@ -155,6 +155,16 @@ const defaultElement = (type: ElementType): Partial<BuilderElement> => {
         textDecoration: 'none',
         border: 'none',
         transition: 'all 0.2s ease',
+      },
+    },
+    link: {
+      tag: 'a',
+      content: 'Click here',
+      href: '#',
+      styles: {
+        color: '#4f46e5',
+        textDecoration: 'underline',
+        cursor: 'pointer',
       },
     },
     divider: {
@@ -172,6 +182,15 @@ const defaultElement = (type: ElementType): Partial<BuilderElement> => {
       styles: {
         width: '100%',
         height: '40px',
+      },
+    },
+    shape: {
+      tag: 'div',
+      styles: {
+        width: '100px',
+        height: '100px',
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
       },
     },
     icon: {
@@ -203,17 +222,127 @@ const defaultElement = (type: ElementType): Partial<BuilderElement> => {
         borderRadius: '8px',
       },
     },
-    hero: {
-      tag: 'section',
+    textarea: {
+      tag: 'textarea',
+      content: '',
+      placeholder: 'Enter your message...',
+      attributes: { rows: '4' },
+      styles: {
+        border: '1px solid #dee2e6',
+        padding: '12px 16px',
+        width: '100%',
+        minHeight: '100px',
+        borderRadius: '8px',
+        fontSize: '16px',
+      },
+    },
+    select: {
+      tag: 'select',
+      content: 'Option 1\nOption 2\nOption 3',
+      styles: {
+        border: '1px solid #dee2e6',
+        padding: '12px 16px',
+        width: '100%',
+        borderRadius: '8px',
+        fontSize: '16px',
+      },
+    },
+    checkbox: {
+      tag: 'div',
+      content: 'Check this option',
       styles: {
         display: 'flex',
-        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '8px',
+      },
+    },
+    embed: {
+      tag: 'div',
+      content: '',
+      styles: {
+        width: '100%',
+        minHeight: '200px',
+        backgroundColor: '#f1f5f9',
+        display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        border: '2px dashed #cbd5e1',
+      },
+    },
+    code: {
+      tag: 'pre',
+      content: 'const hello = "world";\nconsole.log(hello);',
+      styles: {
+        backgroundColor: '#1e293b',
+        color: '#e2e8f0',
+        padding: '20px',
+        borderRadius: '8px',
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        overflow: 'auto',
+      },
+    },
+    map: {
+      tag: 'div',
+      content: 'Map',
+      styles: {
         width: '100%',
-        minHeight: '500px',
-        padding: '80px 20px',
-        textAlign: 'center',
+        height: '300px',
+        backgroundColor: '#e2e8f0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+    },
+    list: {
+      tag: 'ul',
+      content: '',
+      children: [],
+      styles: {
+        padding: '0',
+        listStyle: 'none',
+        margin: '0',
+      },
+    },
+    accordion: {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        width: '100%',
+        border: '1px solid #e2e8f0',
+        borderRadius: '8px',
+        overflow: 'hidden',
+      },
+    },
+    tabs: {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        width: '100%',
+      },
+    },
+    slider: {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        width: '100%',
+        height: '400px',
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '8px',
+      },
+    },
+    gallery: {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '8px',
       },
     },
     navbar: {
@@ -239,6 +368,331 @@ const defaultElement = (type: ElementType): Partial<BuilderElement> => {
         color: '#ffffff',
       },
     },
+    sidebar: {
+      tag: 'aside',
+      content: '',
+      children: [],
+      styles: {
+        width: '280px',
+        padding: '20px',
+        backgroundColor: '#f8fafc',
+        borderRight: '1px solid #e2e8f0',
+      },
+    },
+    modal: {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        position: 'fixed',
+        inset: '0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        zIndex: 50,
+      },
+    },
+    hero: {
+      tag: 'section',
+      content: '',
+      children: [],
+      styles: {
+        padding: '80px 20px',
+        minHeight: '500px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+      },
+    },
+    cta: {
+      tag: 'section',
+      content: '',
+      children: [],
+      styles: {
+        padding: '60px 20px',
+        background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+        textAlign: 'center',
+      },
+    },
+    'feature-grid': {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '24px',
+        padding: '20px',
+      },
+    },
+    'collection-list': {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '16px',
+      },
+    },
+    'product-card': {
+      tag: 'div',
+      content: '',
+      styles: {
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        width: '280px',
+      },
+    },
+    'cart-button': {
+      tag: 'button',
+      content: 'Add to Cart',
+      styles: {
+        backgroundColor: '#4f46e5',
+        color: '#ffffff',
+        padding: '12px 24px',
+        borderRadius: '8px',
+        border: 'none',
+        fontWeight: '600',
+        cursor: 'pointer',
+      },
+    },
+    search: {
+      tag: 'div',
+      content: '',
+      styles: {
+        display: 'flex',
+        alignItems: 'center',
+        border: '1px solid #e2e8f0',
+        borderRadius: '8px',
+        padding: '8px 12px',
+        gap: '8px',
+      },
+    },
+    'social-links': {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        display: 'flex',
+        gap: '12px',
+        alignItems: 'center',
+      },
+    },
+    countdown: {
+      tag: 'div',
+      content: '',
+      styles: {
+        display: 'flex',
+        gap: '16px',
+        justifyContent: 'center',
+      },
+    },
+    progress: {
+      tag: 'div',
+      content: '75',
+      styles: {
+        width: '100%',
+        height: '8px',
+        backgroundColor: '#e2e8f0',
+        borderRadius: '999px',
+        overflow: 'hidden',
+      },
+    },
+    testimonial: {
+      tag: 'blockquote',
+      content: '"This product changed everything for us."',
+      styles: {
+        padding: '24px',
+        borderLeft: '4px solid #4f46e5',
+        fontStyle: 'italic',
+        color: '#334155',
+        fontSize: '18px',
+      },
+    },
+    'pricing-table': {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        border: '1px solid #e2e8f0',
+        borderRadius: '16px',
+        padding: '32px',
+        textAlign: 'center',
+      },
+    },
+    custom: {
+      tag: 'div',
+      content: '',
+      styles: {
+        padding: '16px',
+        minHeight: '50px',
+      },
+    },
+    // Additional VvvebJs-inspired types
+    radio: {
+      tag: 'div',
+      content: 'Option A',
+      styles: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        color: '#334155',
+        fontSize: '14px',
+      },
+    },
+    label: {
+      tag: 'label',
+      content: 'Field Label',
+      styles: {
+        display: 'block',
+        fontWeight: '600',
+        fontSize: '14px',
+        color: '#0f172a',
+        marginBottom: '4px',
+      },
+    },
+    table: {
+      tag: 'table',
+      content: '',
+      children: [],
+      styles: {
+        width: '100%',
+        borderCollapse: 'collapse' as string,
+        border: '1px solid #e2e8f0',
+      },
+    },
+    rating: {
+      tag: 'div',
+      content: '4',
+      styles: {
+        display: 'flex',
+        gap: '4px',
+      },
+    },
+    badge: {
+      tag: 'span',
+      content: 'New',
+      styles: {
+        display: 'inline-block',
+        padding: '2px 10px',
+        fontSize: '12px',
+        fontWeight: '600',
+        borderRadius: '999px',
+        backgroundColor: '#4f46e5',
+        color: '#ffffff',
+      },
+    },
+    alert: {
+      tag: 'div',
+      content: 'This is an important notice.',
+      styles: {
+        padding: '12px 16px',
+        borderRadius: '8px',
+        backgroundColor: '#fef3c7',
+        border: '1px solid #f59e0b',
+        color: '#92400e',
+        fontSize: '14px',
+      },
+    },
+    breadcrumb: {
+      tag: 'nav',
+      content: 'Home / Products / Detail',
+      styles: {
+        fontSize: '14px',
+        color: '#64748b',
+      },
+    },
+    pagination: {
+      tag: 'nav',
+      content: '',
+      children: [],
+      styles: {
+        display: 'flex',
+        gap: '4px',
+        alignItems: 'center',
+      },
+    },
+    figure: {
+      tag: 'figure',
+      content: '',
+      children: [],
+      styles: {
+        margin: '0',
+      },
+    },
+    blockquote: {
+      tag: 'blockquote',
+      content: '"Design is not just what it looks like and feels like. Design is how it works."',
+      styles: {
+        padding: '20px 24px',
+        borderLeft: '4px solid #4f46e5',
+        fontStyle: 'italic',
+        fontSize: '18px',
+        color: '#334155',
+        backgroundColor: '#f8fafc',
+        margin: '0',
+      },
+    },
+    audio: {
+      tag: 'div',
+      content: '',
+      styles: {
+        width: '100%',
+        padding: '12px',
+        backgroundColor: '#f1f5f9',
+        borderRadius: '8px',
+      },
+    },
+    'flip-box': {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        width: '280px',
+        height: '200px',
+        perspective: '1000px',
+      },
+    },
+    counter: {
+      tag: 'div',
+      content: '1,234',
+      styles: {
+        fontSize: '48px',
+        fontWeight: '700',
+        color: '#0f172a',
+        textAlign: 'center',
+      },
+    },
+    'image-compare': {
+      tag: 'div',
+      content: '',
+      children: [],
+      styles: {
+        position: 'relative',
+        width: '100%',
+        height: '300px',
+        overflow: 'hidden',
+        borderRadius: '8px',
+      },
+    },
+    lottie: {
+      tag: 'div',
+      content: '',
+      styles: {
+        width: '200px',
+        height: '200px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f8fafc',
+        borderRadius: '8px',
+        border: '2px dashed #e2e8f0',
+      },
+    },
   };
 
   return defaults[type] || {
@@ -252,6 +706,8 @@ const defaultElement = (type: ElementType): Partial<BuilderElement> => {
 const containerTypes = new Set([
   'section', 'container', 'columns', 'column', 'form', 'navbar', 'footer',
   'sidebar', 'hero', 'modal', 'accordion', 'tabs', 'feature-grid', 'cta',
+  'list', 'slider', 'gallery', 'collection-list', 'social-links', 'pricing-table',
+  'table', 'pagination', 'figure', 'flip-box', 'image-compare',
 ]);
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(

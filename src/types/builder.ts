@@ -3,25 +3,31 @@
 // ============================================
 
 export type ElementType =
+  // Layout
   | 'section'
   | 'container'
   | 'columns'
   | 'column'
+  // Basic
   | 'text'
   | 'heading'
   | 'image'
   | 'video'
   | 'button'
   | 'link'
+  | 'icon'
+  | 'divider'
+  | 'spacer'
+  | 'shape'
+  // Forms
   | 'form'
   | 'input'
   | 'textarea'
   | 'select'
   | 'checkbox'
-  | 'icon'
-  | 'divider'
-  | 'spacer'
-  | 'shape'
+  | 'radio'
+  | 'label'
+  // Rich elements
   | 'embed'
   | 'code'
   | 'map'
@@ -30,23 +36,41 @@ export type ElementType =
   | 'tabs'
   | 'slider'
   | 'gallery'
+  | 'table'
+  // Page sections
   | 'navbar'
   | 'footer'
   | 'sidebar'
   | 'modal'
-  | 'custom'
+  | 'hero'
+  | 'cta'
+  | 'feature-grid'
+  // Commerce
   | 'collection-list'
   | 'product-card'
   | 'cart-button'
+  // Social / Misc
   | 'search'
   | 'social-links'
   | 'countdown'
   | 'progress'
   | 'testimonial'
   | 'pricing-table'
-  | 'cta'
-  | 'hero'
-  | 'feature-grid';
+  // Widgets
+  | 'rating'
+  | 'badge'
+  | 'alert'
+  | 'breadcrumb'
+  | 'pagination'
+  | 'figure'
+  | 'blockquote'
+  | 'audio'
+  | 'flip-box'
+  | 'counter'
+  | 'image-compare'
+  | 'lottie'
+  // Custom
+  | 'custom';
 
 export interface BuilderElement {
   id: string;
@@ -64,6 +88,7 @@ export interface BuilderElement {
     tablet?: Partial<ElementStyles>;
     mobile?: Partial<ElementStyles>;
   };
+  props?: Record<string, string>;
   attributes?: Record<string, string>;
   animations?: Animation[];
   hoverStyles?: Partial<ElementStyles>;
