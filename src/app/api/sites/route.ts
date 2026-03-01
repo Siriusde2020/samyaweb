@@ -15,7 +15,7 @@ const paginationSchema = z.object({
 });
 
 async function isDatabaseAvailable(): Promise<boolean> {
-  if (!process.env.DATABASE_URL) return false;
+  if (!process.env.DATABASE_URL && !process.env.NETLIFY_DATABASE_URL) return false;
   try {
     const { prisma } = await import('@/lib/db');
     await prisma.$queryRaw`SELECT 1`;

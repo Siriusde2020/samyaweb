@@ -1,5 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 
+// Map Netlify's database URL to the standard DATABASE_URL that Prisma expects
+if (!process.env.DATABASE_URL && process.env.NETLIFY_DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.NETLIFY_DATABASE_URL;
+}
+
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
 function createPrismaClient(): PrismaClient {

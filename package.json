@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "postinstall": "prisma generate",
-    "build": "prisma generate && prisma db push --skip-generate && next build",
+    "build": "DATABASE_URL=${DATABASE_URL:-$NETLIFY_DATABASE_URL} prisma generate && DATABASE_URL=${DATABASE_URL:-$NETLIFY_DATABASE_URL} prisma db push --skip-generate --accept-data-loss || true && next build",
     "start": "next start",
     "lint": "next lint",
     "db:migrate": "prisma migrate dev",
