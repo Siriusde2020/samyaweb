@@ -451,6 +451,258 @@ function contactForm(): BlockResult {
 }
 
 // ========================================
+// NAVBAR BLOCKS
+// ========================================
+
+function navbarSimple(): BlockResult {
+  const navId = generateId();
+  const logoId = generateId(); const linksId = generateId();
+  const l1 = generateId(); const l2 = generateId(); const l3 = generateId(); const btnId = generateId();
+  const elements: Record<string, BuilderElement> = {
+    [navId]: el({ id: navId, type: 'navbar', tag: 'nav', label: 'Simple Navbar', children: [logoId, linksId, btnId],
+      styles: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '16px 40px', backgroundColor: '#ffffff', borderBottom: '1px solid #f3f4f6' },
+    }),
+    [logoId]: el({ id: logoId, type: 'heading', tag: 'span', parentId: navId, content: 'Brand',
+      styles: { fontSize: '20px', fontWeight: '800', color: '#111827' },
+    }),
+    [linksId]: el({ id: linksId, type: 'container', parentId: navId, children: [l1, l2, l3],
+      styles: { display: 'flex', gap: '32px', alignItems: 'center' },
+    }),
+    [l1]: el({ id: l1, type: 'link', tag: 'a', parentId: linksId, content: 'Features', href: '#',
+      styles: { fontSize: '14px', color: '#6b7280', textDecoration: 'none', fontWeight: '500' },
+      hoverStyles: { color: '#111827' },
+    }),
+    [l2]: el({ id: l2, type: 'link', tag: 'a', parentId: linksId, content: 'Pricing', href: '#',
+      styles: { fontSize: '14px', color: '#6b7280', textDecoration: 'none', fontWeight: '500' },
+      hoverStyles: { color: '#111827' },
+    }),
+    [l3]: el({ id: l3, type: 'link', tag: 'a', parentId: linksId, content: 'About', href: '#',
+      styles: { fontSize: '14px', color: '#6b7280', textDecoration: 'none', fontWeight: '500' },
+      hoverStyles: { color: '#111827' },
+    }),
+    [btnId]: el({ id: btnId, type: 'button', tag: 'a', parentId: navId, content: 'Sign Up', href: '#',
+      styles: { padding: '10px 20px', backgroundColor: '#4c6ef5', color: '#ffffff', fontSize: '14px', fontWeight: '600', borderRadius: '8px', textDecoration: 'none' },
+    }),
+  };
+  return { elements, rootIds: [navId] };
+}
+
+function navbarDark(): BlockResult {
+  const navId = generateId();
+  const logoId = generateId(); const linksId = generateId();
+  const l1 = generateId(); const l2 = generateId(); const l3 = generateId(); const btnId = generateId();
+  const elements: Record<string, BuilderElement> = {
+    [navId]: el({ id: navId, type: 'navbar', tag: 'nav', label: 'Dark Navbar', children: [logoId, linksId, btnId],
+      styles: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '16px 40px', backgroundColor: '#0f172a' },
+    }),
+    [logoId]: el({ id: logoId, type: 'heading', tag: 'span', parentId: navId, content: 'BRAND',
+      styles: { fontSize: '18px', fontWeight: '800', color: '#ffffff', letterSpacing: '0.05em' },
+    }),
+    [linksId]: el({ id: linksId, type: 'container', parentId: navId, children: [l1, l2, l3],
+      styles: { display: 'flex', gap: '32px', alignItems: 'center' },
+    }),
+    [l1]: el({ id: l1, type: 'link', tag: 'a', parentId: linksId, content: 'Products', href: '#',
+      styles: { fontSize: '14px', color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontWeight: '500' },
+      hoverStyles: { color: '#ffffff' },
+    }),
+    [l2]: el({ id: l2, type: 'link', tag: 'a', parentId: linksId, content: 'Solutions', href: '#',
+      styles: { fontSize: '14px', color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontWeight: '500' },
+      hoverStyles: { color: '#ffffff' },
+    }),
+    [l3]: el({ id: l3, type: 'link', tag: 'a', parentId: linksId, content: 'Company', href: '#',
+      styles: { fontSize: '14px', color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontWeight: '500' },
+      hoverStyles: { color: '#ffffff' },
+    }),
+    [btnId]: el({ id: btnId, type: 'button', tag: 'a', parentId: navId, content: 'Get Started', href: '#',
+      styles: { padding: '10px 20px', backgroundColor: '#6366f1', color: '#ffffff', fontSize: '14px', fontWeight: '600', borderRadius: '8px', textDecoration: 'none' },
+    }),
+  };
+  return { elements, rootIds: [navId] };
+}
+
+// ========================================
+// FAQ BLOCKS
+// ========================================
+
+function faqAccordion(): BlockResult {
+  const sectionId = generateId(); const containerId = generateId();
+  const titleId = generateId(); const listId = generateId();
+  const items = [
+    { q: 'How do I get started?', a: 'Sign up for a free account and follow our quick-start guide. You\'ll be up and running in under 5 minutes.' },
+    { q: 'Is there a free plan?', a: 'Yes! Our free plan includes all core features. Upgrade to Pro for advanced analytics and team collaboration.' },
+    { q: 'Can I export my data?', a: 'Absolutely. You can export all your data at any time in multiple formats including CSV, JSON, and HTML.' },
+    { q: 'What kind of support do you offer?', a: 'We offer email support on all plans, plus live chat for Pro users and dedicated account managers for Business plans.' },
+  ];
+  const itemIds: string[] = [];
+  const allEls: Record<string, BuilderElement> = {};
+
+  for (const item of items) {
+    const qId = generateId(); const aId = generateId();
+    const wrapperId = generateId();
+    itemIds.push(wrapperId);
+    allEls[wrapperId] = el({ id: wrapperId, type: 'container', parentId: listId, children: [qId, aId],
+      styles: { padding: '24px', borderBottom: '1px solid #e5e7eb' },
+    });
+    allEls[qId] = el({ id: qId, type: 'heading', tag: 'h3', parentId: wrapperId, content: item.q,
+      styles: { fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '12px' },
+    });
+    allEls[aId] = el({ id: aId, type: 'text', tag: 'p', parentId: wrapperId, content: item.a,
+      styles: { fontSize: '15px', color: '#6b7280', lineHeight: '1.7' },
+    });
+  }
+
+  allEls[sectionId] = el({ id: sectionId, type: 'section', tag: 'section', label: 'FAQ', children: [containerId],
+    styles: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '100px 24px', backgroundColor: '#ffffff' },
+  });
+  allEls[containerId] = el({ id: containerId, type: 'container', parentId: sectionId, children: [titleId, listId],
+    styles: { maxWidth: '700px', width: '100%' },
+  });
+  allEls[titleId] = el({ id: titleId, type: 'heading', tag: 'h2', parentId: containerId, content: 'Frequently Asked Questions',
+    styles: { fontSize: '40px', fontWeight: '800', color: '#111827', textAlign: 'center', marginBottom: '48px' },
+  });
+  allEls[listId] = el({ id: listId, type: 'container', parentId: containerId, children: itemIds,
+    styles: { border: '1px solid #e5e7eb', borderRadius: '16px', overflow: 'hidden' },
+  });
+
+  return { elements: allEls, rootIds: [sectionId] };
+}
+
+// ========================================
+// PRODUCT / E-COMMERCE BLOCKS
+// ========================================
+
+function productGrid(): BlockResult {
+  const sectionId = generateId(); const containerId = generateId();
+  const titleId = generateId(); const gridId = generateId();
+  const products = [
+    { name: 'Minimalist Watch', price: '$149', desc: 'Swiss movement, sapphire crystal' },
+    { name: 'Leather Wallet', price: '$79', desc: 'Full-grain Italian leather' },
+    { name: 'Canvas Backpack', price: '$129', desc: 'Waxed canvas, brass hardware' },
+  ];
+  const cardIds: string[] = [];
+  const allEls: Record<string, BuilderElement> = {};
+
+  for (const p of products) {
+    const cId = generateId(); const imgId = generateId(); const nId = generateId();
+    const prId = generateId(); const dId = generateId(); const btnId = generateId();
+    cardIds.push(cId);
+    allEls[cId] = el({ id: cId, type: 'column', parentId: gridId, children: [imgId, nId, dId, prId, btnId],
+      styles: { backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden', border: '1px solid #e5e7eb', transition: 'all 0.3s' },
+      hoverStyles: { boxShadow: '0 12px 32px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' },
+    });
+    allEls[imgId] = el({ id: imgId, type: 'image', tag: 'div', parentId: cId,
+      styles: { width: '100%', height: '240px', background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    });
+    allEls[nId] = el({ id: nId, type: 'heading', tag: 'h3', parentId: cId, content: p.name,
+      styles: { fontSize: '18px', fontWeight: '600', color: '#111827', padding: '16px 16px 4px' },
+    });
+    allEls[dId] = el({ id: dId, type: 'text', tag: 'p', parentId: cId, content: p.desc,
+      styles: { fontSize: '14px', color: '#9ca3af', padding: '0 16px' },
+    });
+    allEls[prId] = el({ id: prId, type: 'text', tag: 'span', parentId: cId, content: p.price,
+      styles: { fontSize: '20px', fontWeight: '700', color: '#111827', display: 'block', padding: '8px 16px' },
+    });
+    allEls[btnId] = el({ id: btnId, type: 'button', tag: 'button', parentId: cId, content: 'Add to Cart',
+      styles: { margin: '12px 16px 16px', padding: '12px', backgroundColor: '#111827', color: '#ffffff', fontSize: '14px', fontWeight: '600', borderRadius: '10px', border: 'none', cursor: 'pointer', width: 'calc(100% - 32px)', transition: 'all 0.2s' },
+      hoverStyles: { backgroundColor: '#374151' },
+    });
+  }
+
+  allEls[sectionId] = el({ id: sectionId, type: 'section', tag: 'section', label: 'Product Grid', children: [containerId],
+    styles: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '100px 24px', backgroundColor: '#f9fafb' },
+  });
+  allEls[containerId] = el({ id: containerId, type: 'container', parentId: sectionId, children: [titleId, gridId],
+    styles: { maxWidth: '1100px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+  });
+  allEls[titleId] = el({ id: titleId, type: 'heading', tag: 'h2', parentId: containerId, content: 'Featured Products',
+    styles: { fontSize: '40px', fontWeight: '800', color: '#111827', textAlign: 'center', marginBottom: '48px' },
+  });
+  allEls[gridId] = el({ id: gridId, type: 'columns', parentId: containerId, children: cardIds,
+    styles: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', width: '100%' },
+    responsiveStyles: { mobile: { gridTemplateColumns: '1fr' } },
+  });
+
+  return { elements: allEls, rootIds: [sectionId] };
+}
+
+// ========================================
+// LOGO CLOUD
+// ========================================
+
+function logoCloud(): BlockResult {
+  const sectionId = generateId();
+  const labelId = generateId(); const gridId = generateId();
+  const logos = ['Acme Corp', 'Globex', 'Initech', 'Hooli', 'Pied Piper'];
+  const logoIds: string[] = [];
+  const allEls: Record<string, BuilderElement> = {};
+
+  for (const name of logos) {
+    const id = generateId();
+    logoIds.push(id);
+    allEls[id] = el({ id, type: 'text', tag: 'span', parentId: gridId, content: name,
+      styles: { fontSize: '18px', fontWeight: '700', color: '#d1d5db', textTransform: 'uppercase', letterSpacing: '0.05em' },
+    });
+  }
+
+  allEls[sectionId] = el({ id: sectionId, type: 'section', tag: 'section', label: 'Logo Cloud', children: [labelId, gridId],
+    styles: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '60px 24px', backgroundColor: '#ffffff', borderTop: '1px solid #f3f4f6', borderBottom: '1px solid #f3f4f6' },
+  });
+  allEls[labelId] = el({ id: labelId, type: 'text', tag: 'p', parentId: sectionId, content: 'Trusted by industry leaders',
+    styles: { fontSize: '14px', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: '600', marginBottom: '32px' },
+  });
+  allEls[gridId] = el({ id: gridId, type: 'columns', parentId: sectionId, children: logoIds,
+    styles: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '48px', flexWrap: 'wrap' },
+  });
+
+  return { elements: allEls, rootIds: [sectionId] };
+}
+
+// ========================================
+// FOOTER MINIMAL & NEWSLETTER
+// ========================================
+
+function footerMinimal(): BlockResult {
+  const footId = generateId();
+  const elements: Record<string, BuilderElement> = {
+    [footId]: el({ id: footId, type: 'footer', tag: 'footer', label: 'Minimal Footer', children: [],
+      content: '© 2026 Company Name',
+      styles: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '24px', backgroundColor: '#f9fafb', color: '#9ca3af', fontSize: '13px' },
+    }),
+  };
+  return { elements, rootIds: [footId] };
+}
+
+function footerNewsletter(): BlockResult {
+  const footId = generateId();
+  const topId = generateId(); const textId = generateId(); const formId = generateId();
+  const inputId = generateId(); const btnId = generateId(); const copyId = generateId();
+  const elements: Record<string, BuilderElement> = {
+    [footId]: el({ id: footId, type: 'footer', tag: 'footer', label: 'Newsletter Footer', children: [topId, copyId],
+      styles: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '60px 24px 24px', backgroundColor: '#111827', gap: '40px' },
+    }),
+    [topId]: el({ id: topId, type: 'container', parentId: footId, children: [textId, formId],
+      styles: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' },
+    }),
+    [textId]: el({ id: textId, type: 'heading', tag: 'h3', parentId: topId, content: 'Stay in the loop',
+      styles: { fontSize: '24px', fontWeight: '700', color: '#ffffff' },
+    }),
+    [formId]: el({ id: formId, type: 'container', parentId: topId, children: [inputId, btnId],
+      styles: { display: 'flex', gap: '12px' },
+    }),
+    [inputId]: el({ id: inputId, type: 'input', tag: 'input', parentId: formId,
+      styles: { padding: '12px 20px', borderRadius: '8px', border: 'none', fontSize: '14px', backgroundColor: '#1f2937', color: '#ffffff', width: '260px' },
+    }),
+    [btnId]: el({ id: btnId, type: 'button', tag: 'button', parentId: formId, content: 'Subscribe',
+      styles: { padding: '12px 24px', backgroundColor: '#4c6ef5', color: '#ffffff', fontSize: '14px', fontWeight: '600', borderRadius: '8px', border: 'none', cursor: 'pointer' },
+    }),
+    [copyId]: el({ id: copyId, type: 'text', tag: 'p', parentId: footId, content: '© 2026 Company. All rights reserved.',
+      styles: { fontSize: '13px', color: '#6b7280' },
+    }),
+  };
+  return { elements, rootIds: [footId] };
+}
+
+// ========================================
 // BLOCK REGISTRY
 // ========================================
 
@@ -458,6 +710,8 @@ const BLOCK_REGISTRY: Record<string, BlockGenerator> = {
   // Hero
   heroSplitImage, heroFullscreen, heroMinimal, heroGradient,
   heroVideo: heroFullscreen, heroCreative: heroSplitImage,
+  // Navbar
+  navbarSimple, navbarCentered: navbarSimple, navbarDark,
   // Features
   featuresGrid3, featuresGrid4: featuresGrid3, featuresAlternating: featuresGrid3, featuresShowcase: featuresGrid3,
   // Testimonials
@@ -467,17 +721,15 @@ const BLOCK_REGISTRY: Record<string, BlockGenerator> = {
   // Pricing
   pricingThreeColumn, pricingTwoColumn: pricingThreeColumn,
   // FAQ
-  faqAccordion: featuresGrid3, faqTwoColumn: featuresGrid3,
-  // Navbar
-  navbarSimple: heroMinimal, navbarCentered: heroMinimal, navbarDark: heroMinimal,
+  faqAccordion, faqTwoColumn: faqAccordion,
   // Footer
-  footerMultiColumn, footerMinimal: footerMultiColumn, footerNewsletter: footerMultiColumn,
+  footerMultiColumn, footerMinimal, footerNewsletter,
   // Content
-  statsCounter, logoCloud: statsCounter, teamGrid: testimonialCards, timeline: featuresGrid3,
+  statsCounter, logoCloud, teamGrid: testimonialCards, timeline: faqAccordion,
   // Contact
   contactForm, contactSplit: contactForm,
   // E-Commerce
-  productGrid: featuresGrid3, featuredProduct: heroSplitImage,
+  productGrid, featuredProduct: heroSplitImage,
 };
 
 export function getBlock(blockId: string): BlockResult | null {

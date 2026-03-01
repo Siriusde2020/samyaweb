@@ -80,8 +80,8 @@ export function BuilderLayout() {
           <BuilderCanvas />
         </div>
 
-        {/* Right Panel */}
-        {rightPanel && selectedElementId && (
+        {/* Right Panel - always show when element selected */}
+        {selectedElementId && (
           <div className="w-72 flex-shrink-0 builder-panel overflow-y-auto animate-slide-in">
             <StylePanel />
           </div>

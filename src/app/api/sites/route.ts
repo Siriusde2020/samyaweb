@@ -232,16 +232,10 @@ export async function POST(request: NextRequest) {
         return newSite;
       });
 
-      // If a template was specified, we would copy its pages here.
-      // Template logic is a future enhancement.
-      if (templateId) {
-        // TODO: copy pages from template into the new site
-      }
-
       return NextResponse.json(
         {
           success: true,
-          data: site,
+          data: { ...site, templateId: templateId || 'blank' },
         },
         { status: 201 },
       );
@@ -262,6 +256,7 @@ export async function POST(request: NextRequest) {
           name,
           slug: demoSlug,
           description: description ?? null,
+          templateId: templateId || 'blank',
           status: 'DRAFT',
           domain: null,
           favicon: null,

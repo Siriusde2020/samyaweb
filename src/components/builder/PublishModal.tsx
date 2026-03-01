@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { useBuilderStore } from '@/lib/store/builder-store';
 import { useSiteStore } from '@/lib/store/site-store';
-import { SiteCompiler } from '@/lib/engine/compiler';
 import { formatBytes } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
@@ -166,22 +165,18 @@ function CDNPublishTab() {
         setDeploy(prev => ({ ...prev, progress: i }));
       }
 
-      // Compile the site
-      const compiler = new SiteCompiler(elements, rootElementIds, designSystem, {
-        format: 'html',
-        includeAssets: true,
-        minify: true,
-        cleanCode: true,
-      });
-      compiler.compile();
-
       setDeploy(prev => ({ ...prev, status: 'deploying', progress: 50 }));
 
       // Call deploy API
       const response = await fetch('/api/deploy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ siteId: siteSlug, environment: 'production' }),
+        body: JSON.stringify({
+          siteId: siteSlug,
+          environment: 'production',
+          elements,
+          rootElementIds,
+        }),
       });
 
       // Progress simulation during deploy
@@ -408,26 +403,18 @@ function ExportTab() {
   const [isExporting, setIsExporting] = useState(false);
   const [estimate, setEstimate] = useState<ExportEstimate | null>(null);
 
-  // Calculate size estimate when format or elements change
+  // Calculate size estimate based on element count and format
   useEffect(() => {
-    try {
-      const compiler = new SiteCompiler(elements, rootElementIds, designSystem, {
-        format: selectedFormat,
-        includeAssets: true,
-        minify: true,
-        cleanCode: true,
-      });
-      const files = compiler.compileToFiles();
-      const totalSize = files.reduce((sum, f) => sum + f.size, 0);
-      setEstimate({
-        format: selectedFormat,
-        fileCount: files.length,
-        totalSize,
-      });
-    } catch {
-      setEstimate(null);
-    }
-  }, [elements, rootElementIds, designSystem, selectedFormat]);
+    const elementCount = Object.keys(elements).length;
+    const baseSize = elementCount * 400; // rough estimate: 400 bytes per element
+    const formatMultipliers: Record<string, number> = { html: 1, nextjs: 2.5, gatsby: 2.5, zip: 1.2 };
+    const formatFiles: Record<string, number> = { html: Math.max(3, elementCount / 3), nextjs: elementCount + 8, gatsby: elementCount + 10, zip: Math.max(3, elementCount / 3) };
+    setEstimate({
+      format: selectedFormat,
+      fileCount: Math.round(formatFiles[selectedFormat] || 3),
+      totalSize: Math.round(baseSize * (formatMultipliers[selectedFormat] || 1)),
+    });
+  }, [elements, selectedFormat]);
 
   const formats: Array<{ id: ExportFormat; label: string; desc: string; badge?: string }> = [
     { id: 'html', label: 'Static HTML/CSS/JS', desc: 'Clean, production-ready code. Works anywhere.' },

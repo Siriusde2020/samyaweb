@@ -275,6 +275,14 @@ export function CanvasElement({ elementId }: CanvasElementProps) {
     selectElement(elementId);
   };
 
+  // Drag to reorder support
+  const handleDragStart = (e: React.DragEvent) => {
+    if (element.locked) { e.preventDefault(); return; }
+    e.dataTransfer.setData('moveElementId', elementId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.stopPropagation();
+  };
+
   const handleMouseEnter = () => {
     hoverElement(elementId);
     if (element.hoverStyles) {
@@ -1759,6 +1767,8 @@ export function CanvasElement({ elementId }: CanvasElementProps) {
         showDropIndicator && 'ring-2 ring-brand-400 ring-dashed',
       )}
       style={styleObject as React.CSSProperties}
+      draggable={!element.locked && !isEditing}
+      onDragStart={handleDragStart}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
@@ -1779,25 +1789,71 @@ export function CanvasElement({ elementId }: CanvasElementProps) {
         </div>
       )}
 
-      {/* Action buttons */}
+      {/* Action Toolbar */}
       {isSelected && (
-        <div className="absolute -top-5 right-0 z-20 flex items-center gap-0.5">
+        <div className="absolute -top-7 right-0 z-30 flex items-center gap-px bg-surface-800 rounded-md shadow-lg overflow-hidden">
+          {/* Select Parent */}
+          {element.parentId && (
+            <button
+              onClick={(e) => { e.stopPropagation(); selectElement(element.parentId!); }}
+              className="p-1 text-white hover:bg-surface-600 transition-colors"
+              title="Select Parent"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
+            </button>
+          )}
+          {/* Move Up */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const parentEl = element.parentId ? useBuilderStore.getState().elements[element.parentId] : null;
+              const siblings = parentEl?.children || useBuilderStore.getState().rootElementIds;
+              const idx = siblings.indexOf(elementId);
+              if (idx > 0) moveElement(elementId, element.parentId ?? null, idx - 1);
+            }}
+            className="p-1 text-white hover:bg-surface-600 transition-colors"
+            title="Move Up"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 15l-6-6-6 6" />
+            </svg>
+          </button>
+          {/* Move Down */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const parentEl = element.parentId ? useBuilderStore.getState().elements[element.parentId] : null;
+              const siblings = parentEl?.children || useBuilderStore.getState().rootElementIds;
+              const idx = siblings.indexOf(elementId);
+              if (idx < siblings.length - 1) moveElement(elementId, element.parentId ?? null, idx + 2);
+            }}
+            className="p-1 text-white hover:bg-surface-600 transition-colors"
+            title="Move Down"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          {/* Duplicate */}
           <button
             onClick={(e) => { e.stopPropagation(); duplicateElement(elementId); }}
-            className="p-0.5 bg-surface-700 text-white rounded hover:bg-surface-600 transition-colors"
-            title="Duplicate"
+            className="p-1 text-white hover:bg-surface-600 transition-colors"
+            title="Duplicate (Ctrl+D)"
           >
-            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="9" y="9" width="13" height="13" rx="2" />
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
             </svg>
           </button>
+          {/* Delete */}
           <button
             onClick={(e) => { e.stopPropagation(); deleteElement(elementId); }}
-            className="p-0.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            className="p-1 text-white hover:bg-red-500 transition-colors"
             title="Delete"
           >
-            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
             </svg>
           </button>

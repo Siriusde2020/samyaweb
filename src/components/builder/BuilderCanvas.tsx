@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useBuilderStore } from '@/lib/store/builder-store';
 import { CanvasElement } from './CanvasElement';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,39 @@ const breakpointWidths: Record<Breakpoint, string> = {
   mobile: '375px',
 };
 
+function DropZone({ index }: { index: number }) {
+  const [isOver, setIsOver] = useState(false);
+  const { moveElement, addElement } = useBuilderStore();
+
+  return (
+    <div
+      className={cn(
+        'transition-all duration-150',
+        isOver ? 'h-3 bg-brand-400/30 border-2 border-dashed border-brand-500 rounded' : 'h-0'
+      )}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsOver(true);
+        e.dataTransfer.dropEffect = e.dataTransfer.types.includes('moveelementid') ? 'move' : 'copy';
+      }}
+      onDragLeave={() => setIsOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsOver(false);
+        const moveId = e.dataTransfer.getData('moveElementId');
+        if (moveId) {
+          moveElement(moveId, null, index);
+        } else {
+          const elementType = e.dataTransfer.getData('elementType') as ElementType;
+          if (elementType) addElement(elementType, undefined, index);
+        }
+      }}
+    />
+  );
+}
+
 export function BuilderCanvas() {
   const {
     elements,
@@ -22,6 +55,7 @@ export function BuilderCanvas() {
     showGrid,
     selectElement,
     addElement,
+    moveElement,
   } = useBuilderStore();
 
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
@@ -32,15 +66,21 @@ export function BuilderCanvas() {
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    const moveId = e.dataTransfer.getData('moveElementId');
+    if (moveId) {
+      // Moving an existing element to end of root
+      moveElement(moveId, null, rootElementIds.length);
+      return;
+    }
     const elementType = e.dataTransfer.getData('elementType') as ElementType;
     if (elementType) {
       addElement(elementType);
     }
-  }, [addElement]);
+  }, [addElement, moveElement, rootElementIds.length]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
+    e.dataTransfer.dropEffect = e.dataTransfer.types.includes('moveelementid') ? 'move' : 'copy';
   }, []);
 
   return (
@@ -92,9 +132,15 @@ export function BuilderCanvas() {
               </div>
             </div>
           ) : (
-            rootElementIds.map(id => (
-              <CanvasElement key={id} elementId={id} />
-            ))
+            <>
+              <DropZone index={0} />
+              {rootElementIds.map((id, idx) => (
+                <div key={id}>
+                  <CanvasElement elementId={id} />
+                  <DropZone index={idx + 1} />
+                </div>
+              ))}
+            </>
           )}
         </div>
       </div>

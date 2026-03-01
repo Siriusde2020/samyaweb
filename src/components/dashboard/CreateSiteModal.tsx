@@ -52,7 +52,8 @@ export function CreateSiteModal({ isOpen, onClose }: CreateSiteModalProps) {
       const data = await res.json();
 
       if (data.success && data.data) {
-        router.push(`/builder/${data.data.id}/home`);
+        const tpl = data.data.templateId || selectedTemplate || 'blank';
+        router.push(`/builder/${data.data.id}/home?template=${tpl}`);
       } else {
         setError(data.error || 'Failed to create site');
       }

@@ -184,9 +184,10 @@ export default function DashboardPage() {
             <div>
               <h1 className="text-2xl font-bold text-surface-900 mb-2">Template Marketplace</h1>
               <p className="text-sm text-surface-500 mb-8">Choose from our collection of professionally designed templates</p>
-              <TemplateGallery onSelect={(id) => console.log('Selected template:', id)} />
+              <TemplateGallery onSelect={() => setShowNewSite(true)} />
             </div>
           )}
+          {activeNav === 'settings' && <DashboardSettings />}
         </main>
       </div>
 
@@ -383,6 +384,96 @@ function DashboardDomains() {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function DashboardSettings() {
+  const [profile, setProfile] = useState({ name: 'User', email: 'user@example.com', timezone: 'UTC' });
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-surface-900 mb-2">Account Settings</h1>
+      <p className="text-sm text-surface-500 mb-8">Manage your account preferences</p>
+
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl border border-surface-200 p-6">
+          <h3 className="text-sm font-semibold text-surface-900 mb-4">Profile</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-surface-600 mb-1">Name</label>
+              <input
+                value={profile.name}
+                onChange={(e) => setProfile(p => ({ ...p, name: e.target.value }))}
+                className="builder-input"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-surface-600 mb-1">Email</label>
+              <input
+                value={profile.email}
+                onChange={(e) => setProfile(p => ({ ...p, email: e.target.value }))}
+                className="builder-input"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-surface-600 mb-1">Timezone</label>
+              <select
+                value={profile.timezone}
+                onChange={(e) => setProfile(p => ({ ...p, timezone: e.target.value }))}
+                className="builder-input"
+              >
+                <option value="UTC">UTC</option>
+                <option value="US/Eastern">US Eastern</option>
+                <option value="US/Pacific">US Pacific</option>
+                <option value="Europe/London">Europe/London</option>
+                <option value="Asia/Tokyo">Asia/Tokyo</option>
+              </select>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <Button onClick={handleSave}>Save Profile</Button>
+            {saved && <span className="text-sm text-green-600">Saved!</span>}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-surface-200 p-6">
+          <h3 className="text-sm font-semibold text-surface-900 mb-4">Preferences</h3>
+          <div className="space-y-3">
+            <label className="flex items-center gap-3 text-sm text-surface-700">
+              <input type="checkbox" defaultChecked className="rounded" />
+              Send email notifications for deployments
+            </label>
+            <label className="flex items-center gap-3 text-sm text-surface-700">
+              <input type="checkbox" defaultChecked className="rounded" />
+              Auto-save changes in builder
+            </label>
+            <label className="flex items-center gap-3 text-sm text-surface-700">
+              <input type="checkbox" className="rounded" />
+              Enable dark mode in builder
+            </label>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-surface-200 p-6">
+          <h3 className="text-sm font-semibold text-surface-900 mb-4">API & Integrations</h3>
+          <div className="p-4 bg-surface-50 rounded-lg">
+            <p className="text-xs text-surface-500 mb-1">API Key</p>
+            <div className="flex items-center gap-2">
+              <code className="text-sm font-mono text-surface-700 bg-surface-100 px-3 py-1.5 rounded flex-1">
+                sk-demo-xxxx-xxxx-xxxx
+              </code>
+              <button className="text-xs text-brand-600 hover:text-brand-700 font-medium">Copy</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
