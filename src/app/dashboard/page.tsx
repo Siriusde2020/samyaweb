@@ -44,8 +44,8 @@ export default function DashboardPage() {
     fetch('/api/sites')
       .then(res => res.json())
       .then(data => {
-        if (data.sites && data.sites.length > 0) {
-          setSites(data.sites.map((s: Record<string, unknown>) => ({
+        if (data.data?.items && data.data.items.length > 0) {
+          setSites(data.data.items.map((s: Record<string, unknown>) => ({
             id: s.id,
             name: s.name,
             slug: s.slug,

@@ -44,15 +44,15 @@ export function CreateSiteModal({ isOpen, onClose }: CreateSiteModalProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: siteName,
-          template: selectedTemplate || 'blank',
-          aiPrompt: aiPrompt || undefined,
+          templateId: selectedTemplate || 'blank',
+          description: aiPrompt || undefined,
         }),
       });
 
       const data = await res.json();
 
-      if (data.success && data.site) {
-        router.push(`/builder/${data.site.id}/home`);
+      if (data.success && data.data) {
+        router.push(`/builder/${data.data.id}/home`);
       } else {
         setError(data.error || 'Failed to create site');
       }
